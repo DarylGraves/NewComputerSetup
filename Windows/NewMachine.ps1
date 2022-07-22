@@ -6,7 +6,8 @@
 #TODO: If not joining to the domain, add other apps (Brave, Whatsapp, Discord for example)
 #TODO: PowerToys Always on Toy Config
 #TODO: Any other PowerToys Configs?
-#TODO: Windows Terminal Config Files
+#TODO: Vim Profile
+#TODO: Powershell Profile
 #TODO: Configure Git
 
 $ProgressPreference = 'SilentlyContinue' # Stops web request loading bars clogging the output
@@ -17,6 +18,7 @@ $AppsToInstall = @(
     "Microsoft.PowerToys"
     "Microsoft.WindowsTerminal"
     "Microsoft.VisualStudioCode"
+    "Lexikos.AutoHotKey"
     "Git.Git"
     "Vim.Vim"
 )
@@ -100,6 +102,20 @@ function Install-RsatTools {
     Get-WindowsCapability -Name "*RSAT*" -Online | Add-WindowsCapability -Online
 }
 
+function Set-AutoHotKeyScripts {
+    $Files = @(
+        # Add each file to be moved as a PS Custom Object with a Source and Destination
+        [PSCustomObject]@{
+            Source = $Path + "\ConfigFiles\AutoHotKey\startup.ahk"
+            Destination = $Env:APPDATA + "\Microsoft\Windows\Start Menu\Programs\Startup"
+        }
+    )
+
+    foreach ($File in $Files) {
+        Copy-Item -Path $File.Source -Destination $File.Destination
+    }
+}
+
 function Set-PowerToysConfigFiles {
     # Keyboard Mapper
     $Source = $Path + "\ConfigFiles\PowerToys\KeyboardManager\Default.json"
@@ -113,10 +129,11 @@ function Set-WindowsTerminalConfigFile {
     Copy-Item -Path $Source -Destination $Destination -Force
 }
 
-Create-TempFolder
+# Create-TempFolder
 # Install-Applications -AppsToInstall $AppsToInstall
-Install-Fonts
+# Install-Fonts
 # Install-SysInternals
 # Install-RsatTools
 # Set-PowerToysConfigFiles
 # Set-WindowsTerminalConfigFile
+Set-AutoHotKeyScripts
