@@ -4,6 +4,10 @@
 #TODO: Prompt User for Git Email
 #TODO: Look into automating VSCode Settings Sync more. I don't think it's possible though.
 #TODO: If not joining to the domain, add other apps (Brave, Whatsapp, Discord for example)
+#TODO: PowerToys Always on Toy Config
+#TODO: Any other PowerToys Configs?
+#TODO: Windows Terminal Config Files
+#TODO: Configure Git
 
 $ProgressPreference = 'SilentlyContinue' # Stops web request loading bars clogging the output
 $Path = Split-Path -Path $MyInvocation.MyCommand.Path 
@@ -14,25 +18,14 @@ $AppsToInstall = @(
     "Microsoft.WindowsTerminal"
     "Microsoft.VisualStudioCode"
     "Git.Git"
+    "Vim.Vim"
 )
 
-
-#region Copying Config Files
-
-#TODO: PowerToys Always On Top Config
-#TODO: Any other PowerToys Configs?
-#TODO: Windows Terminal Config Files
-
-#endregion Copying Config Files
-
-#region Running Commands
-#TODO: Configure Git
-#endregion Running Commands
-
-
-#endregion Install SysInternals
-#region Install RSAT
-#endregion Install RSAT
+function Create-TempFolder {
+    if ((Test-Path "C:\temp") -ne $true) {
+        New-Item -Path "C:\temp" -ItemType Directory | Out-Null
+    }
+}
 
 function Install-Applications {
     param (
@@ -51,6 +44,30 @@ function Install-Applications {
             Write-Host "$Application already installed, skipping..." -ForegroundColor Green
         }
     }
+}
+
+function Install-Fonts {
+    Write-Host "Installing Fonts..." -ForegroundColor Green
+
+    $FontUrls = @(
+        # Nerd Font - For Windows Terminal
+        "https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/Hack.zip"
+    )
+    $TempFolder = "C:\Windows\Temp\Fonts"
+    $FontInstaller = (New-Object -ComObject Shell.Application).Namespace(0x14) # Don't ask...
+
+    foreach ($Font in $FontUrls) {
+        Invoke-WebRequest -Uri $Font -OutFile "C:\temp\$(Split-Path $Font -leaf)"
+        Expand-Archive -Path "C:\temp\$(Split-Path $Font -leaf)" -DestinationPath $TempFolder -Force
+
+        Get-ChildItem -path $TempFolder | ForEach-Object {
+            $Font = $_.FullName
+            $FontInstaller.CopyHere($Font,0x10)
+            Remove-Item $Font -Force
+        }
+    }
+
+    Get-Childitem "C:\temp" | Remove-Item -Force
 }
     
 function Install-SysInternals {
@@ -90,7 +107,16 @@ function Set-PowerToysConfigFiles {
     Copy-Item -Path $Source -Destination $Destination -Force
 }
 
-Install-Applications -AppsToInstall $AppsToInstall
-Install-SysInternals
-Install-RsatTools
-Set-PowerToysConfigFiles
+function Set-WindowsTerminalConfigFile {
+    $Source = $Path + "\ConfigFiles\WindowsTerminal\settings.json"
+    $Destination = "$Env:USERPROFILE\Appdata\local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\"
+    Copy-Item -Path $Source -Destination $Destination -Force
+}
+
+Create-TempFolder
+# Install-Applications -AppsToInstall $AppsToInstall
+Install-Fonts
+# Install-SysInternals
+# Install-RsatTools
+# Set-PowerToysConfigFiles
+# Set-WindowsTerminalConfigFile
