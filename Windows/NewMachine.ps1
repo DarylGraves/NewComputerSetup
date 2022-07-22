@@ -21,7 +21,10 @@ $AppsToInstall = @(
     "Lexikos.AutoHotKey"
     "Git.Git"
     "Vim.Vim"
+    "JanDeDobbeleer.OhMyPosh"
 )
+
+$CommentLine = "##########################################"
 
 function Create-TempFolder {
     if ((Test-Path "C:\temp") -ne $true) {
@@ -102,6 +105,27 @@ function Install-RsatTools {
     Get-WindowsCapability -Name "*RSAT*" -Online | Add-WindowsCapability -Online
 }
 
+function Init-OhMyPosh {
+    Write-Host "Configuring Oh-My-Posh for pwsh" -ForegroundColor Yellow
+
+    $Theme = "$env:POSH_THEMES_PATH\slim.org.json"
+    $PwshProfile = "$ENV:USERPROFILE\Documents\Powershell\Microsoft.Powershell_Profile.ps1"
+    $Executable = $ENV:USERPROFILE + "\Appdata\Local\Programs\oh-my-posh\bin\oh-my-posh.exe"   
+    $Command = ". $Executable init pwsh --config $Theme | Invoke-Expression"
+    
+    if((Test-Path $PwshProfile ) -ne $true){
+        New-Item -Path $PwshProfile -ItemType File -Force     
+    }
+    
+    # Only do this if Oh-My-Posh isn't already referenced in the profile.
+    if ((Select-String -Path $PwshProfile -Pattern "Oh-My-Posh").Matches.Count -eq 0) {
+        $CommentLine | Out-File -FilePath $PwshProfile -Append
+        "# Oh-My-Posh Settings" | Out-File -FilePath $PwshProfile -Append
+        $CommentLine | Out-File -FilePath $PwshProfile -Append
+        $Command | Out-File -FilePath $PwshProfile -Append    
+    }  
+}
+
 function Set-AutoHotKeyScripts {
     $Files = @(
         # Add each file to be moved as a PS Custom Object with a Source and Destination
@@ -129,11 +153,12 @@ function Set-WindowsTerminalConfigFile {
     Copy-Item -Path $Source -Destination $Destination -Force
 }
 
-# Create-TempFolder
-# Install-Applications -AppsToInstall $AppsToInstall
-# Install-Fonts
-# Install-SysInternals
-# Install-RsatTools
-# Set-PowerToysConfigFiles
-# Set-WindowsTerminalConfigFile
+Create-TempFolder
+Install-Applications -AppsToInstall $AppsToInstall
+Install-Fonts
+Install-SysInternals
+Install-RsatTools
+Init-OhMyPosh
+Set-PowerToysConfigFiles
+Set-WindowsTerminalConfigFile
 Set-AutoHotKeyScripts
