@@ -10,23 +10,23 @@
 #TODO: Powershell Profile
 #TODO: Configure Git
 
+$Global:ProgressPreference = 'SilentlyContinue' # Stops Expand-Archive Loading bars clogging the output
 $ProgressPreference = 'SilentlyContinue' # Stops web request loading bars clogging the output
 $Path = Split-Path -Path $MyInvocation.MyCommand.Path 
+$CommentLine = "##########################################"
 
 $AppsToInstall = @(
+    "Lexikos.AutoHotKey"
+    "Git.Git"
+    "JanDeDobbeleer.OhMyPosh"
     "Microsoft.Powershell"
     "Microsoft.PowerToys"
     "Microsoft.WindowsTerminal"
     "Microsoft.VisualStudioCode"
-    "Lexikos.AutoHotKey"
-    "Git.Git"
     "Vim.Vim"
-    "JanDeDobbeleer.OhMyPosh"
 )
 
-$CommentLine = "##########################################"
-
-function Create-TempFolder {
+function Set-TempFolder {
     if ((Test-Path "C:\temp") -ne $true) {
         New-Item -Path "C:\temp" -ItemType Directory | Out-Null
     }
@@ -40,13 +40,15 @@ function Install-Applications {
     $CurrentlyInstalled = winget.exe list
         
     foreach ($Application in $AppsToInstall) {
+        $ApplicationName = $Application.Split(".")[1]
+
         if (($CurrentlyInstalled | Select-String -pattern $Application).Matches.Count -eq 0) {
-            Write-Host "Installing $Application..." -ForegroundColor Yellow
-            winget.exe install $Application
-            Write-Host "$Application should now be installed!" -ForegroundColor Green
+            Write-Host "Installing $ApplicationName... " -ForegroundColor Green
+            winget.exe install $Application | Out-Null
+            Write-Host "$ApplicationName should now be installed!" -ForegroundColor Green
         }
         else {
-            Write-Host "$Application already installed, skipping..." -ForegroundColor Green
+            Write-Host "$ApplicationName already installed, skipping..." -ForegroundColor Yellow
         }
     }
 }
@@ -76,7 +78,8 @@ function Install-Fonts {
 }
     
 function Install-SysInternals {
-    Write-Host "Installing SysInternals..." -ForegroundColor Green
+    Write-Host "Installing SysInternals... " -ForegroundColor Green -NoNewline
+
     $Url = "https://download.sysinternals.com/files/SysinternalsSuite.zip"
     $SourcePath = "C:\ToolBox\SysInternals"
     
@@ -102,31 +105,47 @@ function Install-SysInternals {
 }
 
 function Install-RsatTools {
-    Get-WindowsCapability -Name "*RSAT*" -Online | Add-WindowsCapability -Online
+    Write-Host "Installing RSAT Tools, this one takes some time... " -ForegroundColor Green -NoNewLine
+
+    $Success = $false
+    try {
+        Get-WindowsCapability -Name "*RSAT*" -Online | Add-WindowsCapability -Online | Out-Null
+        $Success = $true
+    }
+    catch {
+        Write-Host "Error occured!" -ForegroundColor Red
+    }
+
+    if ($Success) { Write-Host "Success!" -ForegroundColor Green }
 }
 
-function Init-OhMyPosh {
-    Write-Host "Configuring Oh-My-Posh for pwsh" -ForegroundColor Yellow
+function Set-PowershellProfile {
+    Write-Host "Creating Powershell Profile if it doesn't already exist..." -ForegroundColor Green
+
+    if((Test-Path $Profile ) -ne $true){
+        New-Item -Path $Profile -ItemType File -Force     
+    } 
+}
+
+function Set-OhMyPosh {
+    Write-Host "Configuring Oh-My-Posh for pwsh" -ForegroundColor Green
 
     $Theme = "$env:POSH_THEMES_PATH\slim.org.json"
-    $PwshProfile = "$ENV:USERPROFILE\Documents\Powershell\Microsoft.Powershell_Profile.ps1"
     $Executable = $ENV:USERPROFILE + "\Appdata\Local\Programs\oh-my-posh\bin\oh-my-posh.exe"   
     $Command = ". $Executable init pwsh --config $Theme | Invoke-Expression"
     
-    if((Test-Path $PwshProfile ) -ne $true){
-        New-Item -Path $PwshProfile -ItemType File -Force     
-    }
-    
     # Only do this if Oh-My-Posh isn't already referenced in the profile.
-    if ((Select-String -Path $PwshProfile -Pattern "Oh-My-Posh").Matches.Count -eq 0) {
-        $CommentLine | Out-File -FilePath $PwshProfile -Append
-        "# Oh-My-Posh Settings" | Out-File -FilePath $PwshProfile -Append
-        $CommentLine | Out-File -FilePath $PwshProfile -Append
-        $Command | Out-File -FilePath $PwshProfile -Append    
+    if ((Select-String -Path $Profile -Pattern "Oh-My-Posh").Matches.Count -eq 0) {
+        $CommentLine | Out-File -FilePath $Profile -Append
+        "# Oh-My-Posh Settings" | Out-File -FilePath $Profile -Append
+        $CommentLine | Out-File -FilePath $Profile -Append
+        $Command | Out-File -FilePath $Profile -Append    
     }  
 }
 
 function Set-AutoHotKeyScripts {
+    Write-Line "Adding AutoHotKey scripts to startup..." -ForegroundColor Green
+
     $Files = @(
         # Add each file to be moved as a PS Custom Object with a Source and Destination
         [PSCustomObject]@{
@@ -141,6 +160,8 @@ function Set-AutoHotKeyScripts {
 }
 
 function Set-PowerToysConfigFiles {
+    Write-Line "Copying PowerToys config files..." -Foreground Green
+
     # Keyboard Mapper
     $Source = $Path + "\ConfigFiles\PowerToys\KeyboardManager\Default.json"
     $Destination = "$ENV:USERPROFILE\AppData\Local\Microsoft\PowerToys\Keyboard Manager\Default.json"
@@ -148,17 +169,20 @@ function Set-PowerToysConfigFiles {
 }
 
 function Set-WindowsTerminalConfigFile {
+    Write-Host "Configuring Windows Terminal Config..." -ForegroundColor Green
+
     $Source = $Path + "\ConfigFiles\WindowsTerminal\settings.json"
     $Destination = "$Env:USERPROFILE\Appdata\local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\"
     Copy-Item -Path $Source -Destination $Destination -Force
 }
 
-Create-TempFolder
+Set-TempFolder
 Install-Applications -AppsToInstall $AppsToInstall
 Install-Fonts
 Install-SysInternals
 Install-RsatTools
-Init-OhMyPosh
+Set-PowershellProfile
+Set-OhMyPosh
 Set-PowerToysConfigFiles
 Set-WindowsTerminalConfigFile
 Set-AutoHotKeyScripts
