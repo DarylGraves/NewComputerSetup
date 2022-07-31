@@ -4,7 +4,6 @@
 #TODO: Prompt User for Git Email
 #TODO: Look into automating VSCode Settings Sync more. I don't think it's possible though.
 #TODO: If not joining to the domain, add other apps (Brave, Whatsapp, Discord for example)
-#TODO: PowerToys Always on Toy Config
 #TODO: Any other PowerToys Configs?
 #TODO: Vim Profile
 #TODO: Powershell Profile
@@ -144,7 +143,7 @@ function Set-OhMyPosh {
 }
 
 function Set-AutoHotKeyScripts {
-    Write-Line "Adding AutoHotKey scripts to startup..." -ForegroundColor Green
+    Write-Host "Adding AutoHotKey scripts to startup..." -ForegroundColor Green
 
     $Files = @(
         # Add each file to be moved as a PS Custom Object with a Source and Destination
@@ -160,12 +159,62 @@ function Set-AutoHotKeyScripts {
 }
 
 function Set-PowerToysConfigFiles {
-    Write-Line "Copying PowerToys config files..." -Foreground Green
+    Write-Host "Copying PowerToys config files..." -Foreground Green
 
     # Keyboard Mapper
-    $Source = $Path + "\ConfigFiles\PowerToys\KeyboardManager\Default.json"
-    $Destination = "$ENV:USERPROFILE\AppData\Local\Microsoft\PowerToys\Keyboard Manager\Default.json"
-    Copy-Item -Path $Source -Destination $Destination -Force
+    Write-Host "Keyboard Manager... " -NoNewLine -ForegroundColor Yellow
+    $Success = 0
+
+    try {
+        $Source = $Path + "\ConfigFiles\PowerToys\KeyboardManager\Default.json"
+        $Destination = "$ENV:USERPROFILE\AppData\Local\Microsoft\PowerToys\Keyboard Manager\Default.json"
+        Copy-Item -Path $Source -Destination $Destination -Force    
+        $Success = 1
+    }
+    catch {
+        Write-Host "Failed!" -ForegroundColor Red
+    }
+
+    if ($Success -eq 1) {
+        Write-Host "Complete!" -ForegroundColor Green
+    }
+
+    # Always on Top
+    Write-Host "Always on Top... " -NoNewLine -ForegroundColor Yellow
+    $Success = 0
+
+    try {
+        $Source = $Path + "\ConfigFiles\PowerToys\AlwaysOnTop\settings.json"
+        $Destination = "$ENV:USERPROFILE\AppData\Local\Microsoft\PowerToys\AlwaysOnTop\settings.json"
+        Copy-Item -Path $Source -Destination $Destination -Force        
+        $Success = 1
+    }
+    catch {
+        Write-Host "Failed!" -ForegroundColor Red
+    }
+
+    if ($Success -eq 1) {
+        Write-Host "Complete!" -ForegroundColor Green
+    }
+
+    # Restarting PowerToys
+    Write-Host "Restarting PowerToys... " -NoNewline -ForegroundColor Yellow
+    
+    $Process = Get-Process PowerToys
+
+    if ($Process) {
+        try {
+            . $Process.Path
+            Stop-Process -Id $Process.Id
+            Write-Host "Sucess!" -ForegroundColor Green
+        }
+        catch {
+            Write-Host "Failed!" -ForegroundColor Red
+        }
+    }
+
+
+
 }
 
 function Set-WindowsTerminalConfigFile {
