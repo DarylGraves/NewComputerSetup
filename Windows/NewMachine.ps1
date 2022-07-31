@@ -5,9 +5,14 @@
 #TODO: Look into automating VSCode Settings Sync more. I don't think it's possible though.
 #TODO: If not joining to the domain, add other apps (Brave, Whatsapp, Discord for example)
 #TODO: Any other PowerToys Configs?
+#TODO: FancyZones Custom Layouts
 #TODO: Vim Profile
 #TODO: Powershell Profile
+#TODO: TaskBar order (Pinned items)
+#TODO: TaskBar - Remove search, cortana, taskbar and weather
+#TODO: TaskBar - Hide when not in use
 #TODO: Configure Git
+#TODO: Request a reboot after
 
 $Global:ProgressPreference = 'SilentlyContinue' # Stops Expand-Archive Loading bars clogging the output
 $ProgressPreference = 'SilentlyContinue' # Stops web request loading bars clogging the output
