@@ -130,7 +130,7 @@ function Set-PowershellProfile {
 function Set-OhMyPosh {
     Write-Host "Configuring Oh-My-Posh for pwsh" -ForegroundColor Green
 
-    $Theme = "$env:POSH_THEMES_PATH\slim.org.json"
+    $Theme = "$env:userprofile\Appdata\Local\Programs\oh-my-posh\themes\slim.org.json"
     $Executable = $ENV:USERPROFILE + "\Appdata\Local\Programs\oh-my-posh\bin\oh-my-posh.exe"   
     $Command = ". $Executable init pwsh --config $Theme | Invoke-Expression"
     
