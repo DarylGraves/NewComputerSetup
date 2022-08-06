@@ -85,14 +85,15 @@ function Install-Applications {
         
     foreach ($Application in $AppsToInstall) {
         $ApplicationName = $Application.Split(".")[1]
-
+        
+        Write-Host "Installing $ApplicationName... " -ForegroundColor Green -NoNewline
+        
         if (($CurrentlyInstalled | Select-String -pattern $Application).Matches.Count -eq 0) {
-            Write-Host "Installing $ApplicationName... " -ForegroundColor Green
             winget.exe install $Application | Out-Null
-            Write-Host "$ApplicationName should now be installed!" -ForegroundColor Green
+            Write-Host "Complete!" -ForegroundColor Green
         }
         else {
-            Write-Host "$ApplicationName already installed, skipping..." -ForegroundColor Yellow
+            Write-Host "Already Installed!" -ForegroundColor Yellow
         }
     }
 }
