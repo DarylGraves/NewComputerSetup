@@ -20,15 +20,15 @@ $Path = Split-Path -Path $MyInvocation.MyCommand.Path
 $CommentLine = "##########################################"
 
 # These install on every machine - Work and Private
-$AppsToInstall = @(
+$EssentialAppsToInstall = @(
     "Lexikos.AutoHotKey"
-    "Git.Git"
-    "JanDeDobbeleer.OhMyPosh"
-    "Microsoft.Powershell"
-    "Microsoft.PowerToys"
-    "Microsoft.WindowsTerminal"
-    "Microsoft.VisualStudioCode"
-    "Vim.Vim"
+    # "Git.Git"
+    # "JanDeDobbeleer.OhMyPosh"
+    # "Microsoft.Powershell"
+    # "Microsoft.PowerToys"
+    # "Microsoft.WindowsTerminal"
+    # "Microsoft.VisualStudioCode"
+    # "Vim.Vim"
 )
 
 # These only install on Private machines
@@ -40,6 +40,12 @@ $PrivateAppsToInstall = @(
     # "OBSProject.OBSStudio"
     # "Microsoft.VisualStudio.2019.Community"
     # "Cockos.REAPER"
+)
+
+# These only install on Work machines
+$WorkAppsToInstall = @(
+    #TODO: Remove mRemoteNG when finished testing
+    "mRemoteNG.mRemoteNG"
 )
 
 function Get-WorkOrPersonal {
@@ -266,13 +272,21 @@ function Set-WindowsTerminalConfigFile {
 
 $WorkOrPrivateInstall = Get-WorkOrPersonal
 Set-TempFolder
-Install-Applications -AppsToInstall $AppsToInstall
-if($WorkOrPrivateInstall -eq "P") { Install-Applications -AppsToInstall $PrivateAppsToInstall }
-Install-Fonts
-Install-SysInternals
-Install-RsatTools
-Set-PowershellProfile
-Set-OhMyPosh
-Set-PowerToysConfigFiles
-Set-WindowsTerminalConfigFile
-Set-AutoHotKeyScripts
+
+Install-Applications -AppsToInstall $EssentialAppsToInstall
+
+if($WorkOrPrivateInstall -eq "P") { 
+    Install-Applications -AppsToInstall $PrivateAppsToInstall 
+}
+elseif ($WorkOrPrivateInstall -eq "W") {
+    Install-Applications -AppsToInstall $WorkAppsToInstall
+    #Install-SysInternals
+    #Install-RsatTools
+}
+
+# Install-Fonts
+# Set-PowershellProfile
+# Set-OhMyPosh
+# Set-PowerToysConfigFiles
+# Set-WindowsTerminalConfigFile
+# Set-AutoHotKeyScripts
