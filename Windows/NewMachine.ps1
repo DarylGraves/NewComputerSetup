@@ -19,6 +19,7 @@ $ProgressPreference = 'SilentlyContinue' # Stops web request loading bars cloggi
 $Path = Split-Path -Path $MyInvocation.MyCommand.Path 
 $CommentLine = "##########################################"
 
+# These install on every machine - Work and Private
 $AppsToInstall = @(
     "Lexikos.AutoHotKey"
     "Git.Git"
@@ -30,10 +31,43 @@ $AppsToInstall = @(
     "Vim.Vim"
 )
 
+# These only install on Private machines
+$PrivateAppsToInstall = @(
+    "BraveSoftware.BraveBrowser"
+    # "RoyalApps.RoyalTS"
+    # "GOG.Galaxy"
+    # "Valve.Steam"
+    # "OBSProject.OBSStudio"
+    # "Microsoft.VisualStudio.2019.Community"
+    # "Cockos.REAPER"
+)
+
+function Get-WorkOrPersonal {
+    $validOutput = $false
+    $Answer = ""
+
+    do {
+        Write-Host "(" -NoNewline
+        Write-Host "W" -NoNewLine -ForegroundColor Yellow
+        Write-Host ")ork or (" -NoNewline
+        Write-Host "P" -NoNewline -ForegroundColor Yellow
+        Write-Host ")ersonal computer: " -NoNewline
+        $Answer = Read-Host
+
+        if ($Answer -eq "W" -or $Answer -eq "P") {
+            $validOutput = $true
+        }
+    } while ($ValidOutput -ne $true)
+
+    Return $Answer
+}
+
 function Set-TempFolder {
     if ((Test-Path "C:\temp") -ne $true) {
         New-Item -Path "C:\temp" -ItemType Directory | Out-Null
     }
+
+    Set-Location -Path "C:\temp"
 }
 
 function Install-Applications {
@@ -230,8 +264,10 @@ function Set-WindowsTerminalConfigFile {
     Copy-Item -Path $Source -Destination $Destination -Force
 }
 
+$WorkOrPrivateInstall = Get-WorkOrPersonal
 Set-TempFolder
 Install-Applications -AppsToInstall $AppsToInstall
+if($WorkOrPrivateInstall -eq "P") { Install-Applications -AppsToInstall $PrivateAppsToInstall }
 Install-Fonts
 Install-SysInternals
 Install-RsatTools
