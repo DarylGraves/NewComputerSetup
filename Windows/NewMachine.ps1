@@ -22,30 +22,31 @@ $CommentLine = "##########################################"
 # These install on every machine - Work and Private
 $EssentialAppsToInstall = @(
     "Lexikos.AutoHotKey"
-    # "Git.Git"
-    # "JanDeDobbeleer.OhMyPosh"
-    # "Microsoft.Powershell"
-    # "Microsoft.PowerToys"
-    # "Microsoft.WindowsTerminal"
-    # "Microsoft.VisualStudioCode"
-    # "Vim.Vim"
+    "Git.Git"
+    "JanDeDobbeleer.OhMyPosh"
+    "Microsoft.Powershell"
+    "Microsoft.PowerToys"
+    "Microsoft.WindowsTerminal"
+    "Microsoft.VisualStudioCode"
+    "Vim.Vim"
 )
 
 # These only install on Private machines
 $PrivateAppsToInstall = @(
     "BraveSoftware.BraveBrowser"
-    # "RoyalApps.RoyalTS"
-    # "GOG.Galaxy"
-    # "Valve.Steam"
-    # "OBSProject.OBSStudio"
-    # "Microsoft.VisualStudio.2019.Community"
-    # "Cockos.REAPER"
+    "WhatsApp.WhatsApp"
+    "Discord.Discord"
+    "RoyalApps.RoyalTS"
+    "GOG.Galaxy"
+    "Valve.Steam"
+    "OBSProject.OBSStudio"
+    "Microsoft.VisualStudio.2019.Community"
+    "Cockos.REAPER"
 )
 
 # These only install on Work machines
 $WorkAppsToInstall = @(
-    #TODO: Remove mRemoteNG when finished testing
-    "mRemoteNG.mRemoteNG"
+    # Nothing here yet!
 )
 
 function Get-WorkOrPersonal {
@@ -281,13 +282,13 @@ if($WorkOrPrivateInstall -eq "P") {
 }
 elseif ($WorkOrPrivateInstall -eq "W") {
     Install-Applications -AppsToInstall $WorkAppsToInstall
-    #Install-SysInternals
-    #Install-RsatTools
+    Install-SysInternals
+    Install-RsatTools
 }
 
-# Install-Fonts
-# Set-PowershellProfile
-# Set-OhMyPosh
-# Set-PowerToysConfigFiles
-# Set-WindowsTerminalConfigFile
-# Set-AutoHotKeyScripts
+Install-Fonts
+Set-PowershellProfile
+Set-OhMyPosh
+Set-PowerToysConfigFiles
+Set-WindowsTerminalConfigFile
+Set-AutoHotKeyScripts
