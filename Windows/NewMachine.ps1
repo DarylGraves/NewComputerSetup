@@ -6,9 +6,6 @@
 #TODO: Any other PowerToys Configs?
 #TODO: Vim Profile
 #TODO: Powershell Profile
-#TODO: TaskBar order (Pinned items)
-#TODO: TaskBar - Remove search, cortana, taskbar and weather
-#TODO: TaskBar - Hide when not in use
 #TODO: Configure Git
 #TODO: Request a reboot after
 
@@ -270,6 +267,53 @@ function Set-WindowsTerminalConfigFile {
     Copy-Item -Path $Source -Destination $Destination -Force
 }
 
+function Set-TaskBar {
+    #TODO: Set-TaskBar: Test on Windows 11 and potentially limit to Win 10
+    #TODO: Set-TaskBar TaskBar order (Pinned items)
+    
+    Write-Host "Customising Taskbar..." -ForegroundColor Green -NoNewline
+    # Cortana button
+    Set-ItemProperty -Path "hkcu:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name ShowCortanaButton -Value 0
+
+    # Task View Button (Workspaces)
+    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ShowTaskViewButton" -Value 0
+
+    # Search bar and button
+    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" -Name "SearchboxTaskbarMode" -Value 0
+    
+    # Hide Taskbar when not in use
+    $Property = (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3").Settings
+
+    # Property is weird hex, have to change one value in the hex but leave the rest
+    $Property[8] = 3
+
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3" -Name Settings -Value $Property
+    
+    # Weather/News Feed - If explorer is running the registry change won't stick 
+    $Attempt = 0
+
+    do {
+        (Get-Process -Name explorer).kill()
+        Start-Sleep -Seconds 1
+
+        if (Get-Process -Name explorer -ErrorAction SilentlyContinue) {
+            # Sometimes Explorer restarts itself after being closed...
+            $Attempt += 1
+        }        
+        else {
+            Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Feeds" -Name "ShellFeedsTaskbarViewMode" -Type DWord -Value 2
+            $Attempt = 4
+        }
+    } while ( $Attempt -lt 3 )
+    
+    explorer.exe
+    Write-Host "Done! May take a second to re-appear" -ForegroundColor Green
+
+    if ( $Attempt -eq 3 ) {
+        Write-Host "Please Note: Was unable to disable weather bar as Explorer.exe kept restarting automatically. To fix manually right click on Task Bar -> News and Interests -> Turn Off" -ForegroundColor Red
+    }
+}
+
 $WorkOrPrivateInstall = Get-WorkOrPersonal
 Set-TempFolder
 
@@ -284,6 +328,7 @@ elseif ($WorkOrPrivateInstall -eq "W") {
     Install-RsatTools
 }
 
+Set-TaskBar
 Install-Fonts
 Set-PowershellProfile
 Set-OhMyPosh
