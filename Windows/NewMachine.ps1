@@ -12,7 +12,7 @@ $ProgressPreference = 'SilentlyContinue' # Stops web request loading bars cloggi
 $Path = Split-Path -Path $MyInvocation.MyCommand.Path 
 $CommentLine = "##########################################" # TODO: Put comment syntax in a function
 
-# These install on every machine - Work and Private
+# These install on every machine - Work and Personal
 $EssentialAppsToInstall = @(
     "Lexikos.AutoHotKey"
     "Git.Git"
@@ -24,8 +24,8 @@ $EssentialAppsToInstall = @(
     "Vim.Vim"
 )
 
-# These only install on Private machines
-$PrivateAppsToInstall = @(
+# These only install on Personal machines
+$PersonalAppsToInstall = @(
     "BraveSoftware.BraveBrowser"
     "WhatsApp.WhatsApp"
     "Discord.Discord"
@@ -319,7 +319,7 @@ Set-TempFolder
 Install-Applications -AppsToInstall $EssentialAppsToInstall
 
 if($WorkOrPersonal -eq "P") { 
-    Install-Applications -AppsToInstall $PrivateAppsToInstall 
+    Install-Applications -AppsToInstall $PersonalAppsToInstall 
 }
 elseif ($WorkOrPersonal -eq "W") {
     Install-Applications -AppsToInstall $WorkAppsToInstall
