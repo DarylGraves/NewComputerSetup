@@ -204,7 +204,7 @@ function Set-PowerToysConfigFiles {
     Write-Host "Copying PowerToys config files..." -Foreground Green
 
     # Keyboard Mapper
-    Write-Host "Keyboard Manager... " -NoNewLine -ForegroundColor Yellow
+    Write-Host "Keyboard Manager... " -NoNewLine -ForegroundColor Green
     $Success = 0
 
     try {
@@ -222,7 +222,7 @@ function Set-PowerToysConfigFiles {
     }
 
     # Always on Top
-    Write-Host "Always on Top... " -NoNewLine -ForegroundColor Yellow
+    Write-Host "Always on Top... " -NoNewLine -ForegroundColor Green
     $Success = 0
 
     try {
@@ -240,9 +240,9 @@ function Set-PowerToysConfigFiles {
     }
 
     # Restarting PowerToys
-    Write-Host "Restarting PowerToys... " -NoNewline -ForegroundColor Yellow
+    Write-Host "Restarting PowerToys... " -NoNewline -ForegroundColor Green
     
-    $Process = Get-Process PowerToys
+    $Process = Get-Process PowerToys -ErrorAction SilentlyContinue
 
     if ($Process) {
         try {
@@ -272,8 +272,9 @@ function Set-TaskBar {
     #TODO: Set-TaskBar TaskBar order (Pinned items)
     
     Write-Host "Customising Taskbar..." -ForegroundColor Green -NoNewline
+
     # Cortana button
-    Set-ItemProperty -Path "hkcu:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name ShowCortanaButton -Value 0
+    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name ShowCortanaButton -Value 0
 
     # Task View Button (Workspaces)
     Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ShowTaskViewButton" -Value 0
@@ -310,26 +311,26 @@ function Set-TaskBar {
     Write-Host "Done! May take a second to re-appear" -ForegroundColor Green
 
     if ( $Attempt -eq 3 ) {
-        Write-Host "Please Note: Was unable to disable weather bar as Explorer.exe kept restarting automatically. To fix manually right click on Task Bar -> News and Interests -> Turn Off" -ForegroundColor Red
+        Write-Host "Unable to disable weather bar as Explorer.exe kept restarting automatically. To fix manually right click on Task Bar -> News and Interests -> Turn Off" -ForegroundColor Red
     }
 }
 
-$WorkOrPrivateInstall = Get-WorkOrPersonal
+$WorkOrPersonal = Get-WorkOrPersonal
 Set-TempFolder
 
 Install-Applications -AppsToInstall $EssentialAppsToInstall
 
-if($WorkOrPrivateInstall -eq "P") { 
+if($WorkOrPersonal -eq "P") { 
     Install-Applications -AppsToInstall $PrivateAppsToInstall 
 }
-elseif ($WorkOrPrivateInstall -eq "W") {
+elseif ($WorkOrPersonal -eq "W") {
     Install-Applications -AppsToInstall $WorkAppsToInstall
     Install-SysInternals
     Install-RsatTools
 }
 
 Set-TaskBar
-Install-Fonts
+# Install-Fonts
 Set-PowershellProfile
 Set-OhMyPosh
 Set-PowerToysConfigFiles
