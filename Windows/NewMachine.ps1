@@ -1,18 +1,16 @@
-#TODO: Prompt for Static Network and assign if requested
-#TODO: Prompt whether to join Domain and do so if requested (don't forget about renaming machine)
 #TODO: Prompt User for Git Username
 #TODO: Prompt User for Git Email
-#TODO: Look into automating VSCode Settings Sync more. I don't think it's possible though.
-#TODO: Any other PowerToys Configs?
+#TODO: PowerToys needs to have everything else disabled
 #TODO: Vim Profile
-#TODO: Powershell Profile
+#TODO: Powershell Profile (Vim Alias, etc)
 #TODO: Configure Git
+#TODO: Delete Desktop Shortcuts from newly installed applications
 #TODO: Request a reboot after
 
 $Global:ProgressPreference = 'SilentlyContinue' # Stops Expand-Archive Loading bars clogging the output
 $ProgressPreference = 'SilentlyContinue' # Stops web request loading bars clogging the output
 $Path = Split-Path -Path $MyInvocation.MyCommand.Path 
-$CommentLine = "##########################################"
+$CommentLine = "##########################################" # TODO: Put comment syntax in a function
 
 # These install on every machine - Work and Private
 $EssentialAppsToInstall = @(
