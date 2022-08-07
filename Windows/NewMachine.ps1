@@ -280,13 +280,14 @@ function Set-TaskBar {
     # Search bar and button
     Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" -Name "SearchboxTaskbarMode" -Value 0
     
+    #TODO: Uncomment Out Hide TaskBar when done
     # Hide Taskbar when not in use
-    $Property = (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3").Settings
-
+    # $Property = (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3").Settings
+    # 
     # Property is weird hex, have to change one value in the hex but leave the rest
-    $Property[8] = 3
-
-    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3" -Name Settings -Value $Property
+    # $Property[8] = 3
+    # 
+    # Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3" -Name Settings -Value $Property
     
     # Weather/News Feed - If explorer is running the registry change won't stick 
     $Attempt = 0
@@ -328,9 +329,9 @@ elseif ($WorkOrPersonal -eq "W") {
 }
 
 Set-TaskBar
-Install-Fonts
-Set-PowershellProfile
-Set-OhMyPosh
-Set-PowerToysConfigFiles
-Set-WindowsTerminalConfigFile
-Set-AutoHotKeyScripts
+# Install-Fonts
+# Set-PowershellProfile
+# Set-OhMyPosh
+# Set-PowerToysConfigFiles
+# Set-WindowsTerminalConfigFile
+# Set-AutoHotKeyScripts
