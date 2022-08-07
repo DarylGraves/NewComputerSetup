@@ -330,7 +330,7 @@ elseif ($WorkOrPersonal -eq "W") {
 }
 
 Set-TaskBar
-# Install-Fonts
+Install-Fonts
 Set-PowershellProfile
 Set-OhMyPosh
 Set-PowerToysConfigFiles
