@@ -35,6 +35,7 @@ $PersonalAppsToInstall = @(
     "OBSProject.OBSStudio"
     "Microsoft.VisualStudio.2019.Community"
     "Cockos.REAPER"
+    "Spotify.Spotify"
 )
 
 # These only install on Work machines
