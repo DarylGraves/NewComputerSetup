@@ -1,3 +1,4 @@
+#TODO: Move the variables from Line 17 - 59 to their own files!
 #TODO: Prompt User for Git Username
 #TODO: Prompt User for Git Email
 #TODO: PowerToys needs to have everything else disabled
@@ -282,7 +283,6 @@ function Set-WindowsTerminalConfigFile {
 
 function Set-TaskBar {
     #TODO: Set-TaskBar: Test on Windows 11 and potentially limit to Win 10
-    #TODO: Set-TaskBar TaskBar order (Pinned items)
     
     Write-Host "Customising Taskbar..." -ForegroundColor Green -NoNewline
 
@@ -342,8 +342,6 @@ function Add-TaskBarIcons {
     # Create shortcuts
     $WshShell = New-Object -ComObject Wscript.Shell
     foreach ($Application in $ShortcutsToPin.Keys) {
-        #TODO: we are also getting errors when we get to Brave.exe too
-
         if ($ShortcutsToPin[$Application] -eq "") { Continue }
 
         $Command = $ShortcutsToPin[$Application] -split '(?<=.exe)\s', 2
