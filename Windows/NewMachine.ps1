@@ -43,6 +43,20 @@ $WorkAppsToInstall = @(
     # Nothing here yet!
 )
 
+# These are the taskbar shortcuts to be pinned on a personal machine
+$PersonalShortcuts = @{
+    1 = "$Env:USERPROFILE\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe"
+    2 = "$Env:USERPROFILE\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe mail.google.com"
+    3 = "C:\Program Files\Royal TS V6\RoyalTS.exe"
+    4 = "$Env:USERPROFILE\AppData\Local\Discord\Update.exe --processStart Discord.exe"
+    5 = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\devenv.exe"
+    6 = "$ENV:USERPROFILE\AppData\Local\Programs\Microsoft VS Code\Code.exe"
+    7 = "C:\Program Files (x86)\GOG Galaxy\GalaxyClient.exe"
+    8 = "$ENV:USERPROFILE\AppData\Local\WhatsApp\WhatsApp.exe"
+    9 = "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.14.1962.0_x64__8wekyb3d8bbwe\wt.exe"
+    0 = "" #TODO: Add-TaskBarIcons: Test Spotify - It won't install under Admin Context
+}
+
 function Get-WorkOrPersonal {
     $validOutput = $false
     $Answer = ""
@@ -315,24 +329,98 @@ function Set-TaskBar {
     }
 }
 
+function Add-TaskBarIcons {
+    param (
+        [hashtable]$ShortcutsToPin
+    )
+    
+    Write-Host "Configuring Pinned Task Bar Icons... " -NoNewline -ForegroundColor Green
+
+    # Clear what's currently there:
+    Remove-Item -Path "$Env:AppData\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\*" -Force
+
+    # Create shortcuts
+    $WshShell = New-Object -ComObject Wscript.Shell
+    foreach ($Application in $ShortcutsToPin.Keys) {
+        #TODO: we are also getting errors when we get to Brave.exe too
+
+        if ($ShortcutsToPin[$Application] -eq "") { Continue }
+
+        $Command = $ShortcutsToPin[$Application] -split '(?<=.exe)\s', 2
+
+        $ProgramPath = $Command[0]
+        $Arguments = $Command[1]
+        $FileName = "C:\Temp\" + (Split-Path $ProgramPath -LeafBase) 
+
+        if (Test-Path -Path $ProgramPath) {
+            $Number = 1
+            $FileExists = 1
+
+            do {
+                if (Test-Path ($FileName + $Number + ".lnk")) {
+                    $Number += 1
+                }                
+                else {
+                    $FileName = $FileName + $Number
+                    $FileExists = 0
+                }
+            } while ( $FileExists -eq 1)
+
+            $Name = Split-Path $FileName -Leaf
+            $Shortcut = $WshShell.CreateShortcut("C:\Temp\" + $Name + ".lnk" )
+            $Shortcut.TargetPath = $ProgramPath
+            $Shortcut.Arguments = $Arguments
+            $Shortcut.Save()
+        }
+    }
+
+    # Move them into place
+    Move-Item -Path "c:\temp\*.lnk" -Destination "$Env:Appdata\Microsoft\Internet Explorer\Quick Launch\User Pinned\Taskbar\"
+
+    # TODO: Add-TaskBarIcons: Needs to make a function which will save a copy of the registry (to speed up any changes in the future)
+    # TODO: Add-TaskBarIcons: You've hardcoded the personal registry here! How do we make this dynamic between Personal and Work?
+    
+    # Import Registry Key which connects to the shortcuts
+    $RegKey = Get-Content ($Path + "\RegistryKeys\PinnedIcons_Personal.bytes") -AsByteStream
+    Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\TaskBand" -Name "Favorites" -Value $RegKey
+
+    Write-Host "Complete!" -ForegroundColor Green
+    Write-Host "Refreshing TaskBar..." -NoNewline -ForegroundColor Green
+
+    Get-Process explorer | Stop-Process
+
+    Start-Sleep -Seconds 2
+
+    try {
+        Get-Process explorer | Out-Null
+    }
+    catch {
+        Start-Process explorer.exe | Out-Null
+    }
+
+    Write-Host "Complete!" -ForegroundColor Green
+}
+
 $WorkOrPersonal = Get-WorkOrPersonal
 Set-TempFolder
+Set-TaskBar
 
 Install-Applications -AppsToInstall $EssentialAppsToInstall
-
+ 
 if($WorkOrPersonal -eq "P") { 
-    Install-Applications -AppsToInstall $PersonalAppsToInstall 
+    Install-Applications -AppsToInstall $PersonalAppsToInstall
+    Add-TaskBarIcons -ShortcutsToPin $PersonalShortcuts
 }
 elseif ($WorkOrPersonal -eq "W") {
     Install-Applications -AppsToInstall $WorkAppsToInstall
     Install-SysInternals
     Install-RsatTools
+    Add-TaskBarIcons "W"
 }
 
-Set-TaskBar
-# Install-Fonts
-# Set-PowershellProfile
-# Set-OhMyPosh
-# Set-PowerToysConfigFiles
-# Set-WindowsTerminalConfigFile
-# Set-AutoHotKeyScripts
+Install-Fonts
+Set-PowershellProfile
+Set-OhMyPosh
+Set-PowerToysConfigFiles
+Set-WindowsTerminalConfigFile
+et-AutoHotKeyScripts
