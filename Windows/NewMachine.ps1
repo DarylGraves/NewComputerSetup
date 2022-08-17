@@ -149,9 +149,68 @@ function Copy-Configurations {
     }
 }
 
+function Set-Taskbar {
+    switch ($Global:OperatingSystem) {
+        "Windows 10" { 
+            Set-Windows10TaskBar
+         }
+        "Windows 11" {  
+            #TODO: Windows 11 Taskbar
+            Write-Debug "Nothing for Windows 11 yet"
+        }
+    }
+}
+
+function Set-Windows10TaskBar {
+    # TODO: This requires testing as copied straight out of old code.
+    Write-Debug "Setting Windows 10 TaskBar"
+
+    # Cortana button
+    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name ShowCortanaButton -Value 0
+
+    # Task View Button (Workspaces)
+    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ShowTaskViewButton" -Value 0
+
+    # Search bar and button
+    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" -Name "SearchboxTaskbarMode" -Value 0
+    
+    # Hide Taskbar when not in use
+    $Property = (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3").Settings
+    
+    # Property is weird hex, have to change one value in the hex but leave the rest
+    $Property[8] = 3
+    
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3" -Name Settings -Value $Property
+    
+    # Weather/News Feed - If explorer is running the registry change won't stick 
+    $Attempt = 0
+
+    Write-Debug "Restarting Explorer"
+    do {
+        (Get-Process -Name explorer).kill()
+        Start-Sleep -Seconds 1
+
+        if (Get-Process -Name explorer -ErrorAction SilentlyContinue) {
+            # Sometimes Explorer restarts itself after being closed...
+            $Attempt += 1
+        }        
+        else {
+            Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Feeds" -Name "ShellFeedsTaskbarViewMode" -Type DWord -Value 2
+            $Attempt = 4
+        }
+    } while ( $Attempt -lt 3 )
+    
+    explorer.exe
+
+    if ( $Attempt -eq 3 ) {
+        Write-Host "Unable to disable weather bar as Explorer.exe kept restarting automatically. To fix manually right click on Task Bar -> News and Interests -> Turn Off" -ForegroundColor Red
+    }
+}
+
 # Steps which run
 Set-TempFolder
 Install-Fonts        -FromFile $FontsFile
 Install-Applications -FromFile $AppsEssentialsFile
 Install-Applications -FromFile $AppsPersonalFile
 Copy-Configurations   -FromFile $ConfigsFile
+Set-Taskbar
