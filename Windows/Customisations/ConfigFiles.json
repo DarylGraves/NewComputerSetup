@@ -15,6 +15,6 @@
     "Name": "Windows Terminal",
     "Application": "",
     "Source": "...\\ConfigFiles\\WindowsTerminal\\settings.json",
-    "Destination": "..\\Appdata\\local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json"
+    "Destination": "...\\Appdata\\local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json"
   }
 ]
