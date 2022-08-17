@@ -7,6 +7,7 @@ $Global:OperatingSystem = (
 $Fonts_File = $Global:ScriptPath + "\Customisations\FontsToInstall.txt"
 $Apps_EssentialsFile = $Global:ScriptPath + "\Customisations\App_Essentials.txt"
 $Apps_PersonalFile = $Global:ScriptPath + "\Customisations\App_Personal.txt"
+$Configs_File = $Global:ScriptPath + "\Customisations\ConfigFiles.json"
 
 # Global Variable Debugging
 Write-Debug "Script running from $ScriptPath"
@@ -81,8 +82,7 @@ function Install-Applications {
         
         if (($CurrentlyInstalled | Select-String -pattern $Application).Matches.Count -eq 0) {
             try {
-                #TODO: winget.exe - remove comment stopping it from running
-                #winget.exe install $Application | Out-Null
+                winget.exe install $Application | Out-Null
                 Write-Host "Complete!" -ForegroundColor Green   
             }
             catch {
@@ -95,8 +95,64 @@ function Install-Applications {
     }
 }
 
+function Copy-Configurations {
+    param (
+        [string]$FromFile
+    )
+    
+    if ((Test-Path $FromFile) -eq $False) {
+        Write-Error "Path cannot be found!"
+        return
+    }
+
+    $ConfigSettings = Get-Content $FromFile | ConvertFrom-Json
+
+    foreach ($ConfigFile in $ConfigSettings) {
+        Write-Debug $ConfigFile.Name
+        
+        $Source = $ConfigFile.Source.Replace("...", $Global:ScriptPath)
+        $Destination = $ConfigFile.Destination.Replace("...", $ENV:USERPROFILE)
+
+        Write-Debug "   Copying from: $Source"
+        Write-Debug "   Copying to: $Destination"
+
+        if (Test-Path $Source) {
+            try {
+                Copy-Item -Path $Source -Destination $Destination -Force
+            }
+            catch {
+                Write-Error "Error occured!"
+            }
+        }
+        else {
+            Write-Error "Source file doesn't exist!"
+        }
+    }
+
+    $AppsToRestart = ($ConfigSettings | Select-Object Application -Unique).Application
+
+    foreach ($Application in $AppsToRestart) {
+        try {
+            if ($Application -ne "") {
+                Write-Debug "Restarting $Application"
+                $Process = Get-Process $Application -ErrorAction SilentlyContinue
+    
+                if ($Process) {
+                    Stop-Process -Id $Process.Id
+                    . $Process.Path
+                }
+            }
+        }
+        catch {
+            Write-Error "An error occured restarting Appplication"
+        }   
+    }
+}
+
 # Steps which run
+# TODO: Sort of the _File format thing, it's inconsistent!
 Create-TempFolder
 Install-Fonts        -FromFile $Fonts_File
 Install-Applications -FromFile $Apps_EssentialsFile
 Install-Applications -FromFile $Apps_PersonalFile
+Copy-Configurations   -FromFile $Configs_File
