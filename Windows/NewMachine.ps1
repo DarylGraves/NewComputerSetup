@@ -28,7 +28,7 @@ catch {
     Exit
 }
 
-# Initial Prepwork
+# Functions
 function Create-TempFolder {
     if ((Test-Path "C:\temp") -ne $true) {
         New-Item -Path "C:\temp" -ItemType Directory | Out-Null
@@ -53,7 +53,7 @@ function Install-Fonts {
 
         Get-ChildItem -path $TempFolder | ForEach-Object {
             $Font = $_.FullName
-            $FontInstaller.CopyHere($Font,0x10)
+            #$FontInstaller.CopyHere($Font,0x10)
             Remove-Item $Font -Force
         }
     }
@@ -61,7 +61,6 @@ function Install-Fonts {
     Get-Childitem "C:\temp" | Remove-Item -Force
 }
 
-# Application Installs
 function Install-Applications {
     param (
         [String]$FromFile
@@ -83,7 +82,7 @@ function Install-Applications {
         if (($CurrentlyInstalled | Select-String -pattern $Application).Matches.Count -eq 0) {
             try {
                 #TODO: winget.exe - remove comment stopping it from running
-                winget.exe install $Application | Out-Null
+                #winget.exe install $Application | Out-Null
                 Write-Host "Complete!" -ForegroundColor Green   
             }
             catch {
@@ -96,6 +95,7 @@ function Install-Applications {
     }
 }
 
+# Steps which run
 Create-TempFolder
 Install-Fonts        -FromFile $Fonts_File
 Install-Applications -FromFile $Apps_EssentialsFile
