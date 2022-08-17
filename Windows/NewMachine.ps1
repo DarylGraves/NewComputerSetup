@@ -4,10 +4,10 @@ $Global:OperatingSystem = (
             (Get-CimInstance -ClassName Win32_OperatingSystem).Caption |
             Select-String "Windows \d\d").Matches.Value
 
-$Fonts_File = $Global:ScriptPath + "\Customisations\FontsToInstall.txt"
-$Apps_EssentialsFile = $Global:ScriptPath + "\Customisations\App_Essentials.txt"
-$Apps_PersonalFile = $Global:ScriptPath + "\Customisations\App_Personal.txt"
-$Configs_File = $Global:ScriptPath + "\Customisations\ConfigFiles.json"
+$FontsFile = $Global:ScriptPath + "\Customisations\FontsToInstall.txt"
+$AppsEssentialsFile = $Global:ScriptPath + "\Customisations\App_Essentials.txt"
+$AppsPersonalFile = $Global:ScriptPath + "\Customisations\App_Personal.txt"
+$ConfigsFile = $Global:ScriptPath + "\Customisations\ConfigFiles.json"
 
 # Global Variable Debugging
 Write-Debug "Script running from $ScriptPath"
@@ -16,7 +16,7 @@ Write-Debug "Essential Apps Path: $Apps_EssentialsFile"
 Write-Debug "Personal Apps Path: $Apps_PersonalFile"
 
 # Validation Steps
-if ($Global:OperatingSystem -eq $Null) {
+if ($null -eq $Global:OperatingSystem) {
     Write-Error "This script will only run on Windows machines." 
     Exit
 }
@@ -30,7 +30,7 @@ catch {
 }
 
 # Functions
-function Create-TempFolder {
+function Set-TempFolder {
     if ((Test-Path "C:\temp") -ne $true) {
         New-Item -Path "C:\temp" -ItemType Directory | Out-Null
     }
@@ -54,7 +54,7 @@ function Install-Fonts {
 
         Get-ChildItem -path $TempFolder | ForEach-Object {
             $Font = $_.FullName
-            #$FontInstaller.CopyHere($Font,0x10)
+            $FontInstaller.CopyHere($Font,0x10)
             Remove-Item $Font -Force
         }
     }
@@ -150,9 +150,8 @@ function Copy-Configurations {
 }
 
 # Steps which run
-# TODO: Sort of the _File format thing, it's inconsistent!
-Create-TempFolder
-Install-Fonts        -FromFile $Fonts_File
-Install-Applications -FromFile $Apps_EssentialsFile
-Install-Applications -FromFile $Apps_PersonalFile
-Copy-Configurations   -FromFile $Configs_File
+Set-TempFolder
+Install-Fonts        -FromFile $FontsFile
+Install-Applications -FromFile $AppsEssentialsFile
+Install-Applications -FromFile $AppsPersonalFile
+Copy-Configurations   -FromFile $ConfigsFile
