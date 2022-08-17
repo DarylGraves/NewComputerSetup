@@ -1,0 +1,11 @@
+# Insert applications to install on all machines via Winget here
+# Lines beginning with # are ignored
+
+Lexikos.AutoHotKey
+Git.Git
+JanDeDobbeleer.OhMyPosh
+Microsoft.Powershell
+Microsoft.PowerToys
+Microsoft.WindowsTerminal
+Microsoft.VisualStudioCode
+Vim.Vim
