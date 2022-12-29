@@ -1,0 +1,7 @@
+[
+  {
+    "Name": "WindowsTerminal",
+    "Source": "\\ConfigFiles\\WindowsTerminal\\settings.json",
+    "Destination": "\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_7wekyb3d8bbwe\\LocalState\\settings.json"
+  }
+]
