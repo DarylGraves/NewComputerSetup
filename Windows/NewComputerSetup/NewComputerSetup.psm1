@@ -45,6 +45,7 @@ Any source or destination with "appdata" in the path will be stripped to begin a
 function Add-NcConfig {
     param (
         [string]$Name,
+        [string]$FileName,
         [string]$Source,
         [string]$Destination
     )
@@ -63,6 +64,7 @@ function Add-NcConfig {
     
     $Json += [PSCustomObject]@{
         Name = $Name
+        FileName = $FileName
         Source = $Source
         Destination = $Destination
     }
@@ -92,6 +94,7 @@ Set-NcConfig -Name "Windows Terminal" -Source "\ConfigFiles\WindowsTerminal\Sett
 function Set-NcConfig {
     param (
         [string]$Name,
+        [string]$FileName,
         [string]$Source,
         [string]$Destination
     )
@@ -110,6 +113,7 @@ function Set-NcConfig {
     $Json = $Json | Where-Object { $_.Name -ne $Name }
     $Json += [PSCustomObject]@{
         Name = $Name
+        FileName = $FileName
         Source = $Source
         Destination = $Destination
     }
@@ -151,4 +155,137 @@ function Remove-NcConfig {
     $Json = ($Json | Where-Object { $_.Name -ne $Name } )
 
     $Json | ConvertTo-Json | Out-File -FilePath ( $PSScriptRoot + "\ConfigFiles.json" )
+}
+
+<#
+.SYNOPSIS
+Takes the data from ConfigFiles.json and copies the data from the module directory into the specified locations
+
+.DESCRIPTION
+Takes the data from ConfigFiles.json and copies the data from the module directory into the specific locations
+
+.EXAMPLE
+Deploy-NcConfig
+
+.NOTES
+Overwrites any existing file of the same name.
+#>
+function Deploy-NcConfig {
+    [CmdletBinding()]
+    param ()
+
+    $Json = Get-NcConfig
+    
+    
+    foreach ($Entry in $Json) {
+        Write-Debug "Beginning $($Entry.Name)"
+       
+        $Source = [System.IO.Path]::Combine(
+            $PSScriptRoot, 
+            $Entry.Source.Trim("\"), 
+            $Entry.FileName.Trim("\")
+        )
+    
+        $Destination = [System.IO.Path]::Combine(
+            $Entry.Destination.Trim("\"), 
+            $Entry.FileName.Trim("\")
+        )
+    
+        if ($Destination -like "*AppData*") {
+            Write-Debug "AppData destination detected"
+            $Destination = $Env:UserProfile + "\" + $Destination
+            Write-Debug "Destination is now: $Destination"
+        }
+
+        Write-Debug "Planning to copy $Source"
+        Write-Debug "to $Destination"
+
+        if (!(Test-Path -Path $Source)) {
+            Write-Error -Message "Source: $Source could not be found"
+            continue
+        }
+
+        if (!(Test-Path -Path (Split-Path $Destination -Parent ))) {
+            Write-Error -Message "Destination: $Destination could not be found"
+            continue
+        }
+
+        Copy-Item -Path $Source -Destination $Destination -Force
+    }
+}
+
+<#
+.SYNOPSIS
+Takes the data from ConfigFiles.json and copies the data from the specified locations back to the module directory and then, optionally, to github
+
+.DESCRIPTION
+Takes the data from ConfigFiles.json and copies the data from the specified locations back to the module directory and then, optionally, to github
+
+.EXAMPLE
+Sync-NcConfig
+
+.NOTES
+Prompts for Github but this is a seperate function
+#>
+function Sync-NcConfig {
+    [cmdletbinding()]
+    param ()
+    
+    $Json = Get-NcConfig
+
+    foreach($Entry in $Json) {
+        Write-Debug "Beginning $($Entry.Name)"
+        
+        # Note when we prepare the variables below we are inverting the $Entry.___
+        # For example $Source below is $Entry.DESTINATION not $Entry.Source.... Confusing!
+    
+        $Source = [System.IO.Path]::Combine(
+            $Entry.Destination.Trim("\"),
+            $Entry.FileName.Trim("\")
+        )
+
+        $Destination = [System.IO.Path]::Combine(
+            $PSScriptRoot,
+            $Entry.Source.Trim("\"),
+            $Entry.FileName.Trim("\")
+        )
+
+        if ($Source -like "*Appdata*") {
+            Write-Debug "AppData Source detected"
+            $Source = $Env:UserProfile + "\" + $Source
+            Write-Debug "Source is now $Source"
+        }
+    
+        Write-Debug "Planning to copy $Source"
+        Write-Debug "to $Destination"
+    
+        if (!(Test-Path -Path $Source)) {
+            Write-Error -Message "Source: $Source could not be found"
+            continue
+        }
+    
+        if (!(Test-Path -Path (Split-Path $Destination -Parent ))) {
+            Write-Error -Message "Destination: $Destination could not be found"
+            continue
+        }
+    
+        Copy-Item -Path $Source -Destination $Destination -Force
+    }
+
+    $ValidAnswer = $False
+    do {
+        $Answer = Read-Host "Files copied, would you like to push to Github? (Y/N)"
+
+        if (($Answer.Count -eq 1) -and
+            ($Answer[0] -eq "Y" -or
+            $Answer[0] -eq "N" )
+        ) {
+            $ValidAnswer = $True
+            if ($Answer -eq "Y") {
+                # TODO: Github
+                Write-Host "Github goes here"
+            }
+        }
+
+    } while ( $ValidAnswer -ne $True ) 
 }
