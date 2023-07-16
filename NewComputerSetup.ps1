@@ -50,16 +50,16 @@ function New-ComputerSetup {
         Set-Location -Path $Path
 
         if ($Win11) {
-            #Install-Fonts -FontFolder ".\Windows\Fonts\Hack NF\"
+            Install-Fonts -FontFolder ".\Windows\Fonts\Hack NF\"
             Copy-Files -ImportFile ".\Windows\ConfigFiles\ConfigFiles.json" -Type "Config Files"
-            #Start-Winget -ImportFile ".\Windows\ConfigFiles\WinGet\win11-personal.txt"
+            Start-Winget -ImportFile ".\Windows\ConfigFiles\WinGet\win11-personal.txt"
             Import-RegistryKey -ImportFile ".\Windows\PinnedIcons\Win11_PinnedIcons.reg"
             Copy-Files -ImportFile ".\Windows\PinnedIcons\PinnedIcons.json" -Type "Pinned Taskbar Icons"
 
             Write-Host "All tasks complete!" -ForegroundColor Green
             Write-Host "Restarting Computer in five seconds..." -ForegroundColor Yellow
             Start-Sleep -Seconds 5
-            #Restart-Computer -Force
+            Restart-Computer -Force
         }
     }
     
