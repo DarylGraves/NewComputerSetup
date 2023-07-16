@@ -1,0 +1,17 @@
+[
+  {
+    "PrefixVariable": "%localappdata%",
+    "Source": ".\\Windows\\ConfigFiles\\WindowsTerminal\\settings.json",
+    "Destination": "\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json"
+  },
+  {
+    "PrefixVariable": "%localappdata%",
+    "Source": ".\\Windows\\ConfigFiles\\PowerToys\\AlwaysOnTop\\Settings.json",
+    "Destination": "\\Microsoft\\PowerToys\\AlwaysOnTop\\settings.json"
+  },
+  {
+    "PrefixVariable": "%localappdata%",
+    "Source": ".\\Windows\\ConfigFiles\\PowerToys\\KeyboardManager\\Default.json",
+    "Destination": "\\Microsoft\\PowerToys\\Keyboard Manager\\Default.json"
+  }
+]
