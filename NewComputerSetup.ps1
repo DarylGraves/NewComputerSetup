@@ -57,9 +57,6 @@ function New-ComputerSetup {
             Copy-Files -ImportFile ".\Windows\PinnedIcons\PinnedIcons.json" -Type "Pinned Taskbar Icons"
 
             Write-Host "All tasks complete!" -ForegroundColor Green
-            Write-Host "Restarting Computer in five seconds..." -ForegroundColor Yellow
-            Start-Sleep -Seconds 5
-            Restart-Computer -Force
         }
     }
     
