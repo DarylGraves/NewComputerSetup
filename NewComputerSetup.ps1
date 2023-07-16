@@ -50,18 +50,32 @@ function New-ComputerSetup {
         Set-Location -Path $Path
 
         if ($Win11) {
-            Install-Fonts -FontFolder ".\Windows\Fonts\Hack NF\"
-            Copy-ConfigFiles -ImportFile ".\Windows\ConfigFiles\ConfigFiles.json"
-            Start-Winget -ImportFile ".\Windows\ConfigFiles\WinGet\win11-personal.txt"
-            
+            #Install-Fonts -FontFolder ".\Windows\Fonts\Hack NF\"
+            Copy-Files -ImportFile ".\Windows\ConfigFiles\ConfigFiles.json" -Type "Config Files"
+            #Start-Winget -ImportFile ".\Windows\ConfigFiles\WinGet\win11-personal.txt"
+            Import-RegistryKey -ImportFile ".\Windows\PinnedIcons\Win11_PinnedIcons.reg"
+            Copy-Files -ImportFile ".\Windows\PinnedIcons\PinnedIcons.json" -Type "Pinned Taskbar Icons"
+
             Write-Host "All tasks complete!" -ForegroundColor Green
             Write-Host "Restarting Computer in five seconds..." -ForegroundColor Yellow
             Start-Sleep -Seconds 5
-            Restart-Computer -Force
+            #Restart-Computer -Force
         }
     }
     
-    # TODO: 3. If Linux
+    # TODO: 3. Cater for Linux...
+}
+
+function Import-RegistryKey {
+    param (
+        [string]$ImportFile
+    )
+    
+    Write-Host "Importing Registry File $ImportFile." -ForegroundColor Green
+    reg.exe import $ImportFile 
+    
+    Write-Host "Restarting Explorer." -ForegroundColor Green
+    Get-Process -Name "explorer" | Stop-Process
 }
 
 function Start-Winget {
@@ -70,15 +84,30 @@ function Start-Winget {
     )
         
     Write-Host "Installing Applications with Winget." -ForegroundColor Green
-    # Check Winget exists...
-    where.exe winget.exe 2> Out-Null
     
-    if($LASTEXITCODE -ne 0){
+    # Check Winget exists...
+    $Winget = Get-Command -Name winget -ErrorAction ignore
+    
+    if(-not $Winget){
         Write-Error "Winget.exe not found, exiting."
         return
     }
     
-    winget.exe import $ImportFile
+    $FileContent = Get-Content -Path $ImportFile    
+    foreach ($row in $FileContent) {
+        Write-Host "Installing Package '$row'" -ForegroundColor Yellow
+        $Result = winget.exe install $row
+
+        if($Result -like "*Found an existing package already installed*"){
+            Write-Host "$($Row.Split('.')[1]) already installed!" -ForegroundColor Green
+        }
+        elseif ($LASTEXITCODE -ne 0) {
+            Write-Host "Error installing $($row.Split('.')[1])" -ForegroundColor Red
+        }
+        else {
+            Write-Host "$($row.Split('.')[1]) successfully installed!" -ForegroundColor Green
+        }
+    }
 }
 
 function Install-Fonts {
@@ -94,12 +123,13 @@ function Install-Fonts {
     }
 }
 
-function Copy-ConfigFiles {
+function Copy-Files {
     param (
-        [string]$ImportFile
+        [string]$ImportFile,
+        [string]$Type
     )
     
-    Write-Host "Copy config files." -ForegroundColor Green
+    Write-Host "Copying $Type." -ForegroundColor Green
 
     if(!(Test-Path -Path $ImportFile)){
         Write-Error "$ImportFile doesn't exist"
@@ -112,7 +142,8 @@ function Copy-ConfigFiles {
     foreach ($Entry in $Content) {
         $Prefix = [System.Environment]::ExpandEnvironmentVariables($Entry.PrefixVariable)
         $Destination = $Prefix + $Entry.Destination
-        Copy-Item -Path $Entry.Source -Destination $Destination
+
+        Copy-Item -Path $Entry.Source -Destination $Destination -Force -Recurse
     }
 
 }

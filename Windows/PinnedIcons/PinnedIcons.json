@@ -1,0 +1,7 @@
+[
+  {
+    "PrefixVariable": "%appdata%",
+    "Source": ".\\Windows\\PinnedIcons\\TaskBar",
+    "Destination": "\\Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\"
+  }
+]
