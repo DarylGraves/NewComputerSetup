@@ -62,7 +62,6 @@ function New-ComputerSetup {
 
         if ($Win11) {
             Install-Fonts -FontFolder ".\Windows\Fonts\Hack NF\"
-            Copy-Files -ImportFile ".\Windows\ConfigFiles\ConfigFiles.json" -Type "Config Files"
             $Result = Start-Winget -ImportFile ".\Windows\ConfigFiles\WinGet\win11-personal.txt"
             
             if($Result)
@@ -70,7 +69,8 @@ function New-ComputerSetup {
                 Write-Host "Errors during Winget... Quitting. Please resolve and then re-run." -ForegroundColor red
                 return
             }
-
+            
+            Copy-Files -ImportFile ".\Windows\ConfigFiles\ConfigFiles.json" -Type "Config Files"
             Import-RegistryKey -ImportFile ".\Windows\PinnedIcons\Win11_PinnedIcons.reg"
             Copy-Files -ImportFile ".\Windows\PinnedIcons\PinnedIcons.json" -Type "Pinned Taskbar Icons"
 
