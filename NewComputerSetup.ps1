@@ -11,6 +11,7 @@ function New-ComputerSetup {
 "@
 
     Write-Host "$Logo" -ForegroundColor Green
+    
     # Check computer is running as admin
     $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
     if(!($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))) {
@@ -19,6 +20,16 @@ function New-ComputerSetup {
     }
 
     Write-Host "User is running as Admin, continuing..." -ForegroundColor Green
+    
+    # Check computer has winget
+    
+    Write-Host "Checking Winget is installed..." -Foreground Green
+    $Winget = Get-Command -Name winget -ErrorAction ignore
+    
+    if(-not $Winget){
+        Write-Host "Winget.exe not found, please run all Windows Updates and try again." -ForegroundColor Red
+        return
+    }
     
     Write-Host "Gathering computer information..." -ForegroundColor Green
     $ComputerInfo = Get-ComputerInfo
@@ -75,20 +86,13 @@ function Import-RegistryKey {
     Get-Process -Name "explorer" | Stop-Process
 }
 
+
 function Start-Winget {
     param (
         [string]$ImportFile
     )
         
     Write-Host "Installing Applications with Winget." -ForegroundColor Green
-    
-    # Check Winget exists...
-    $Winget = Get-Command -Name winget -ErrorAction ignore
-    
-    if(-not $Winget){
-        Write-Error "Winget.exe not found, exiting."
-        return
-    }
     
     $FileContent = Get-Content -Path $ImportFile    
     foreach ($row in $FileContent) {
