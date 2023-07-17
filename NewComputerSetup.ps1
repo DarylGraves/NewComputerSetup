@@ -63,7 +63,14 @@ function New-ComputerSetup {
         if ($Win11) {
             Install-Fonts -FontFolder ".\Windows\Fonts\Hack NF\"
             Copy-Files -ImportFile ".\Windows\ConfigFiles\ConfigFiles.json" -Type "Config Files"
-            Start-Winget -ImportFile ".\Windows\ConfigFiles\WinGet\win11-personal.txt"
+            $Result = Start-Winget -ImportFile ".\Windows\ConfigFiles\WinGet\win11-personal.txt"
+            
+            if($Result)
+            {
+                Write-Host "Errors during Winget... Quitting. Please resolve and then re-run." -ForegroundColor red
+                return
+            }
+
             Import-RegistryKey -ImportFile ".\Windows\PinnedIcons\Win11_PinnedIcons.reg"
             Copy-Files -ImportFile ".\Windows\PinnedIcons\PinnedIcons.json" -Type "Pinned Taskbar Icons"
 
@@ -94,7 +101,9 @@ function Start-Winget {
         
     Write-Host "Installing Applications with Winget." -ForegroundColor Green
     
+    $AnyErrors = $False
     $FileContent = Get-Content -Path $ImportFile    
+
     foreach ($row in $FileContent) {
         Write-Host "Installing Package '$row'" -ForegroundColor Yellow
         $Result = winget.exe install $row
@@ -104,11 +113,14 @@ function Start-Winget {
         }
         elseif ($LASTEXITCODE -ne 0) {
             Write-Host "Error installing $($row.Split('.')[1])" -ForegroundColor Red
+            $AnyErrors = $true
         }
         else {
             Write-Host "$($row.Split('.')[1]) successfully installed!" -ForegroundColor Green
         }
     }
+
+    return $AnyErrors
 }
 
 function Install-Fonts {
