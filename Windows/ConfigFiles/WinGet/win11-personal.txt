@@ -3,17 +3,11 @@ Cockos.REAPER
 Discord.Discord
 Git.Git
 JanDeDobbeleer.OhMyPosh
-Logitech.OptionsPlus
-Microsoft.Edge
-Microsoft.EdgeWebView2Runtime
-Microsoft.OneDrive
 Microsoft.PowerShell
 Microsoft.PowerToys
-Microsoft.VCRedist.2015+.x64
 Microsoft.VisualStudio.2022.Community
 Microsoft.VisualStudioCode
 Microsoft.WindowsTerminal
-Nvidia.GeForceExperience
 Obsidian.Obsidian
 Playnite.Playnite
 RoyalApps.RoyalTS
