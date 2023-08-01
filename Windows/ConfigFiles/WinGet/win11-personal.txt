@@ -1,3 +1,4 @@
+ALCPU.CoreTemp
 Anki.Anki
 Cockos.REAPER
 Discord.Discord
