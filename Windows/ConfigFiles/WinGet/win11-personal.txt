@@ -15,3 +15,4 @@ RoyalApps.RoyalTS
 Valve.Steam
 VideoLAN.VLC
 Vim.Vim
+Whatsapp.Whatsapp
