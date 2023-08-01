@@ -106,7 +106,7 @@ function Start-Winget {
 
     foreach ($row in $FileContent) {
         Write-Host "Installing Package '$row'" -ForegroundColor Yellow
-        $Result = winget.exe install $row
+        $Result = winget.exe install $row --accept-source-agreements --accept-package-agreements
 
         if($Result -like "*Found an existing package already installed*"){
             Write-Host "$($Row.Split('.')[1]) already installed!" -ForegroundColor Green
